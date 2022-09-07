@@ -1,0 +1,66 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                     String      @id @default(uuid())
+    createdAt              DateTime    @default(now())
+    updatedAt              DateTime    @updatedAt
+    email                  String?
+    hash                   String?
+    phoneNumber            String      @unique
+    isPhoneNumberConfirmed Boolean     @default(false)
+    username               String?
+    age                    Int?
+    aboutMe                String?
+    sex                    String?
+    role                   Int
+    roles                  Roles       @relation(fields: [role], references: [id])
+    favouriteDrinks        UserDrink[]
+
+    @@map("users")
+}
+
+model Roles {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    name      String   @unique
+    users     User[]
+}
+
+model Drink {
+    id             Int         @id @default(autoincrement())
+    createdAt      DateTime    @default(now())
+    updatedAt      DateTime    @updatedAt
+    name           String
+    icon           String
+    drinkType      Int
+    type           DrinkType   @relation(fields: [drinkType], references: [id])
+    favoredByUsers UserDrink[]
+
+    @@map("drinks")
+}
+
+model DrinkType {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    type      String   @unique
+    drinks    Drink[]
+
+    @@map("drinkTypes")
+}
+
+model UserDrink {
+    userId  String
+    drinkId Int
+    user    User   @relation(fields: [userId], references: [id])
+    drink   Drink  @relation(fields: [drinkId], references: [id])
+
+    @@id([userId, drinkId])
+}
