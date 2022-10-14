@@ -8,29 +8,29 @@ datasource db {
 }
 
 model User {
-    id                     String      @id @default(uuid())
-    createdAt              DateTime    @default(now())
-    updatedAt              DateTime    @updatedAt
+    id                     String        @id @default(uuid())
+    createdAt              DateTime      @default(now())
+    updatedAt              DateTime      @updatedAt
     email                  String?
     hash                   String?
-    phoneNumber            String      @unique
-    isPhoneNumberConfirmed Boolean     @default(false)
+    phoneNumber            String        @unique
+    isPhoneNumberConfirmed Boolean       @default(false)
     username               String?
     age                    Int?
     aboutMe                String?
     sex                    String?
-    role                   Int
-    roles                  Roles       @relation(fields: [role], references: [id])
+    role                   Role
     favouriteDrinks        UserDrink[]
+    requests               UserRequest[]
+    posts                  Post[]
 
     @@map("users")
 }
 
-model Roles {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    name      String   @unique
-    users     User[]
+enum Role {
+    basic_user
+    admin
+    super_admin
 }
 
 model Drink {
@@ -42,6 +42,7 @@ model Drink {
     drinkType      Int
     type           DrinkType   @relation(fields: [drinkType], references: [id])
     favoredByUsers UserDrink[]
+    postDrinks     Post[]
 
     @@map("drinks")
 }
@@ -63,4 +64,40 @@ model UserDrink {
     drink   Drink  @relation(fields: [drinkId], references: [id])
 
     @@id([userId, drinkId])
+}
+
+enum RequestTypes {
+    CHAT
+    LOCATION
+}
+
+enum RequestStatus {
+    ACCEPTED
+    DENIED
+}
+
+model Post {
+    id          Int           @id @default(autoincrement())
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    expiresAt   DateTime
+    createdBy   String
+    description String?
+    location    String
+    requests    UserRequest[]
+    user        User          @relation(fields: [createdBy], references: [id])
+    drink       Drink         @relation(fields: [id], references: [id])
+
+    @@map("posts")
+}
+
+model UserRequest {
+    id        Int           @id @default(autoincrement())
+    post_id   Int
+    type      RequestTypes
+    from_user String
+    status    RequestStatus @default(DENIED)
+    createdAt DateTime      @default(now())
+    user      User          @relation(fields: [from_user], references: [id])
+    post      Post          @relation(fields: [post_id], references: [id])
 }

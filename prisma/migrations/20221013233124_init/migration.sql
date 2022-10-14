@@ -11,19 +11,9 @@ CREATE TABLE `users` (
     `age` INTEGER NULL,
     `aboutMe` VARCHAR(191) NULL,
     `sex` VARCHAR(191) NULL,
-    `role` INTEGER NOT NULL,
+    `role` ENUM('basic_user', 'admin', 'super_admin') NOT NULL,
 
     UNIQUE INDEX `users_phoneNumber_key`(`phoneNumber`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Roles` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `name` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `Roles_name_key`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -58,8 +48,30 @@ CREATE TABLE `UserDrink` (
     PRIMARY KEY (`userId`, `drinkId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- AddForeignKey
-ALTER TABLE `users` ADD CONSTRAINT `users_role_fkey` FOREIGN KEY (`role`) REFERENCES `Roles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateTable
+CREATE TABLE `posts` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `createdBy` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `location` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserRequest` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `post_id` INTEGER NOT NULL,
+    `type` ENUM('CHAT', 'LOCATION') NOT NULL,
+    `from_user` VARCHAR(191) NOT NULL,
+    `status` ENUM('ACCEPTED', 'DENIED') NOT NULL DEFAULT 'DENIED',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `drinks` ADD CONSTRAINT `drinks_drinkType_fkey` FOREIGN KEY (`drinkType`) REFERENCES `drinkTypes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -69,3 +81,15 @@ ALTER TABLE `UserDrink` ADD CONSTRAINT `UserDrink_userId_fkey` FOREIGN KEY (`use
 
 -- AddForeignKey
 ALTER TABLE `UserDrink` ADD CONSTRAINT `UserDrink_drinkId_fkey` FOREIGN KEY (`drinkId`) REFERENCES `drinks`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `posts` ADD CONSTRAINT `posts_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `posts` ADD CONSTRAINT `posts_id_fkey` FOREIGN KEY (`id`) REFERENCES `drinks`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserRequest` ADD CONSTRAINT `UserRequest_from_user_fkey` FOREIGN KEY (`from_user`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserRequest` ADD CONSTRAINT `UserRequest_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
