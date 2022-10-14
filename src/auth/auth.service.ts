@@ -5,7 +5,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { PhoneNumberDTO } from "../user/dto/phone-number.dto";
 import { VerifyUserPhoneNumberDto } from "../user/dto/verify-phone-user.dto";
-import { User } from ".prisma/client";
+import { User, Role } from ".prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -23,7 +23,7 @@ export class AuthService {
         await this.ps.user.create({
           data: {
             phoneNumber,
-            role: 1, // basic_user role
+            role: Role.basic_user, // basic_user role
           },
           select: { phoneNumber: true, id: true },
         });

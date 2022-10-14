@@ -5,6 +5,8 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { SmsModule } from "./sms/sms.module";
 import { UserModule } from "./user/user.module";
 import { CaslModule } from "./casl/casl.module";
+import { DrinkModule } from './drink/drink.module';
+import { DrinkTypeModule } from './drink_type/drink_type.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { CaslModule } from "./casl/casl.module";
     UserModule,
     SmsModule,
     CaslModule,
+    DrinkModule,
+    DrinkTypeModule,
   ],
 })
 export class AppModule {}

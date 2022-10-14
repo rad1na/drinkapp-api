@@ -1,5 +1,5 @@
-import { User } from ".prisma/client";
-import { AbilityBuilder, AbilityClass } from "@casl/ability";
+import { Drink, DrinkType, Role, User } from ".prisma/client";
+import { AbilityBuilder, AbilityClass, subject } from "@casl/ability";
 import { PrismaAbility, Subjects } from "@casl/prisma";
 import { Injectable } from "@nestjs/common";
 
@@ -11,11 +11,13 @@ export enum Action {
   Delete = "delete",
 }
 
-type AppAbility = PrismaAbility<
+export type AppAbility = PrismaAbility<
   [
     string,
     Subjects<{
       User: User;
+      Drink: Drink;
+      DrinkType: DrinkType;
     }>,
   ]
 >;
@@ -28,8 +30,12 @@ export class CaslAbilityFactory {
     can(Action.Read, "User", { id: user.id });
     can(Action.Update, "User", { id: user.id });
     can(Action.Delete, "User", { id: user.id });
-    if (user.role === 3) {
+    if (user.role === Role.admin || user.role === Role.super_admin) {
       can(Action.Manage, "all");
+    }
+    if (user.role === Role.admin) {
+      can(Action.Read, "User", { role: Role.admin || Role.basic_user });
+      cannot(Action.Manage, "User", { role: Role.super_admin || Role.admin });
     }
     return build();
   }
